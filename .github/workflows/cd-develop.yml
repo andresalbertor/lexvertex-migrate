@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       schemas:
-        default: "lex_core vigilis"
+        default: "lex_core lex_config vigilis"
 permissions:
   contents: read
   packages: write
@@ -55,7 +55,7 @@ jobs:
           HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
           VPS_MIGRATE_ENV: ${{ secrets.VPS_MIGRATE_ENV }}
           GH_PAT: ${{ secrets.GH_PAT }}
-          SCHEMAS: ${{ github.event.inputs.schemas || 'lex_core vigilis' }}
+          SCHEMAS: ${{ github.event.inputs.schemas || 'lex_core lex_config vigilis' }}
         shell: bash
         run: |
           set -euo pipefail

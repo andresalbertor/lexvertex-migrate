@@ -6,11 +6,12 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * Single Flyway runner. Requires {@code --schema=lex_core|vigilis} (or {@code MIGRATE_SCHEMA}).
+ * Single Flyway runner. Requires {@code --schema=lex_core|lex_config|vigilis}
+ * (or {@code MIGRATE_SCHEMA}).
  */
 public final class DbMigrationsApplication {
 
-    private static final Set<String> ALLOWED_SCHEMAS = Set.of("lex_core", "vigilis");
+    private static final Set<String> ALLOWED_SCHEMAS = Set.of("lex_core", "lex_config", "vigilis");
 
     private DbMigrationsApplication() {
     }
@@ -56,12 +57,12 @@ public final class DbMigrationsApplication {
         schema = schema == null ? "" : schema.trim().toLowerCase(Locale.ROOT);
         if (schema.isEmpty()) {
             throw new IllegalArgumentException(
-                    "Missing required --schema=lex_core|vigilis (or env MIGRATE_SCHEMA)"
+                    "Missing required --schema=lex_core|lex_config|vigilis (or env MIGRATE_SCHEMA)"
             );
         }
         if (!ALLOWED_SCHEMAS.contains(schema)) {
             throw new IllegalArgumentException(
-                    "Unsupported schema '" + schema + "'. Allowed: lex_core, vigilis"
+                    "Unsupported schema '" + schema + "'. Allowed: lex_core, lex_config, vigilis"
             );
         }
         return schema;
