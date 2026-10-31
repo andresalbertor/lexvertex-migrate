@@ -10,6 +10,7 @@ class DbMigrationsApplicationTest {
     @Test
     void resolveSchemaFromArgs() {
         assertEquals("lex_core", DbMigrationsApplication.resolveSchema(new String[]{"--schema=lex_core"}));
+        assertEquals("lex_config", DbMigrationsApplication.resolveSchema(new String[]{"--schema=lex_config"}));
         assertEquals("vigilis", DbMigrationsApplication.resolveSchema(new String[]{"--schema=vigilis"}));
     }
 
