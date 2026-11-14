@@ -6,6 +6,14 @@ on:
     inputs:
       schemas:
         default: "lex_config lex_core lex_audit vigilis"
+      reset:
+        description: Pass reset=true to split-migrate (destructive clean)
+        type: boolean
+        default: false
+      skip_migrate:
+        description: Build/push image only (no VPS migrate)
+        type: boolean
+        default: false
 permissions:
   contents: read
   packages: write
@@ -48,6 +56,7 @@ jobs:
             ${{ env.IMAGE_PREFIX }}/db-migrations:${{ github.sha }}
   migrate:
     needs: docker
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip_migrate != true }}
     runs-on: ubuntu-latest
     steps:
       - name: Dispatch or run migrate
@@ -56,13 +65,26 @@ jobs:
           VPS_MIGRATE_ENV: ${{ secrets.VPS_MIGRATE_ENV }}
           GH_PAT: ${{ secrets.GH_PAT }}
           SCHEMAS: ${{ github.event.inputs.schemas || 'lex_config lex_core lex_audit vigilis' }}
+          RESET: ${{ github.event.inputs.reset || false }}
         shell: bash
         run: |
           set -euo pipefail
           if [[ -n "${HOSTINGER_API_TOKEN:-}" && -n "${VPS_MIGRATE_ENV:-}" ]]; then
             echo "Local migrate secrets present but script lives in infra — dispatching monorepo"
           fi
+          # On push after baseline squash, prefer image-only then manual reset; skip auto migrate
+          # unless workflow_dispatch explicitly requested. Push always skips to avoid failing PDN.
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "Push to develop: image published; skipping auto migrate (run reset/migrate manually)."
+            exit 0
+          fi
+          RESET_JSON=false
+          if [[ "${RESET}" == "true" || "${RESET}" == "1" ]]; then
+            RESET_JSON=true
+          fi
+          PAYLOAD=$(jq -n --arg schemas "$SCHEMAS" --argjson reset "${RESET_JSON}" \
+            '{schemas:$schemas, reset:$reset, confirm_reset:(if $reset then "YES" else "" end)}')
           curl -fsS -X POST -H "Authorization: Bearer ${GH_PAT}" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
             https://api.github.com/repos/andresalbertor/lexvertex/dispatches \
-            -d "{\"event_type\":\"split-migrate\",\"client_payload\":{\"schemas\":\"${SCHEMAS}\"}}"
+            -d "{\"event_type\":\"split-migrate\",\"client_payload\":${PAYLOAD}}"
           echo
