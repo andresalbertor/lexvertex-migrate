@@ -1,6 +1,4 @@
--- V1 (lex_config): tabla JDBC para Spring Cloud Config Server.
--- Column KEY requires MySQL backticks in queries.
--- Runtime: config-server user lex_config_app (SELECT only).
+-- Baseline DDL for schema lex_config (Spring Cloud Config JDBC).
 
 CREATE TABLE IF NOT EXISTS PROPERTIES (
     ID BIGINT NOT NULL AUTO_INCREMENT,
