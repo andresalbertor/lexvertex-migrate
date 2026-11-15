@@ -78,11 +78,29 @@ class BaselineMigrationsTest {
     }
 
     @Test
-    @DisplayName("lex_audit and vigilis baselines exist")
-    void auditAndVigilisBaselinesExist() throws IOException {
+    @DisplayName("lex_audit baseline exists")
+    void auditBaselineExists() throws IOException {
         final String audit = read("/db/migration/lex_audit/V1__audit_event.sql");
         assertTrue(audit.contains("audit_event"), "lex_audit must create audit_event");
-        assertResource("/db/migration/vigilis/V1__baseline.sql");
+    }
+
+    @Test
+    @DisplayName("vigilis baseline schema and bootstrap seed exist")
+    void vigilisBaselineExists() throws IOException {
+        final String ddl = read("/db/migration/vigilis/V1__schema.sql");
+        assertTrue(ddl.contains("CREATE TABLE `app_config`") || ddl.contains("CREATE TABLE app_config"),
+                "vigilis DDL must create app_config");
+        assertTrue(ddl.contains("updated_by"), "vigilis DDL must include updated_by audit columns");
+        assertTrue(ddl.contains("CREATE TABLE `procesos`") || ddl.contains("CREATE TABLE procesos"),
+                "vigilis DDL must create procesos");
+
+        final String seed = read("/db/migration/vigilis/V2__bootstrap_seed.sql");
+        assertTrue(seed.contains("scheduler_config"), "Must seed scheduler_config");
+        assertTrue(seed.contains("sic_chequeo_inicial"), "Must seed sic_chequeo_inicial");
+        assertTrue(seed.contains("documentos_retencion_dias"), "Must seed documentos_retencion_dias");
+        assertTrue(seed.contains("despacho_smtp_default"), "Must seed despacho_smtp_default");
+        assertTrue(seed.contains("006_audit_created_by_updated_by"),
+                "Must mark vigilis SQL migrations as applied");
     }
 
     private static void assertResource(final String path) throws IOException {
