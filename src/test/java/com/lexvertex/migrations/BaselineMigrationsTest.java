@@ -101,6 +101,12 @@ class BaselineMigrationsTest {
         assertTrue(seed.contains("despacho_smtp_default"), "Must seed despacho_smtp_default");
         assertTrue(seed.contains("006_audit_created_by_updated_by"),
                 "Must mark vigilis SQL migrations as applied");
+
+        final String dropLegacy = read("/db/migration/vigilis/V5__drop_hallazgos_sic_legacy.sql");
+        assertTrue(dropLegacy.contains("DROP TABLE IF EXISTS vigilancia_sic_hallazgos"),
+                "SIC findings live on actuaciones, not the legacy hallazgos table");
+        assertTrue(dropLegacy.contains("007_retirar_hallazgos_sic_legacy"),
+                "Flyway must record the vigilis SQL version so the app runner does not reapply it");
     }
 
     @Test
