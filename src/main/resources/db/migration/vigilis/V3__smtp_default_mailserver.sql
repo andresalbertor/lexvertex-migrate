@@ -1,15 +1,15 @@
--- PDN: hidrata despacho_smtp_default con el docker-mailserver interno.
--- V2 dejó host/user/password vacíos a propósito (secretos); este script fija
--- lo no secreto. smtp_password permanece vacío en Flyway — se inyecta en PDN
--- con one-shot (MAIL_NOREPLY_PASSWORD), nunca en git.
+-- PDN: hidrata despacho_smtp_default (SMTP del producto, oculto en UI).
+-- Auth: contact@ (buzón operativo). From: no-reply@ (remitente visible).
+-- Host público mail.lexvertex.cloud (cert STARTTLS del docker-mailserver).
+-- smtp_password permanece vacío en Flyway — one-shot PDN con MAIL_CONTACT_PASSWORD.
 
 UPDATE `app_config`
 SET
   `value` = JSON_SET(
     COALESCE(`value`, CAST('{}' AS JSON)),
-    '$.smtp_host', 'mailserver',
+    '$.smtp_host', 'mail.lexvertex.cloud',
     '$.smtp_port', 587,
-    '$.smtp_user', 'no-reply@lexvertex.cloud',
+    '$.smtp_user', 'contact@lexvertex.cloud',
     '$.smtp_security', 'tls',
     '$.smtp_remitente_email', 'no-reply@lexvertex.cloud',
     '$.smtp_remitente_nombre', 'Vigilis by Lex Vertex'
