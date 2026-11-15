@@ -103,6 +103,22 @@ class BaselineMigrationsTest {
                 "Must mark vigilis SQL migrations as applied");
     }
 
+    @Test
+    @DisplayName("PDN SMTP usa mail.lexvertex.cloud")
+    void smtpProdUsesPublicMailHost() throws IOException {
+        final String config = read("/db/migration/lex_config/V5__smtp_prod_public_host.sql");
+        assertTrue(config.contains("mail.lexvertex.cloud"), "Account/identity host must be the public mail name");
+        assertTrue(config.contains("spring.mail.host"));
+        assertTrue(config.contains("mail.smtp.ssl.trust"));
+        assertFalse(config.contains("checkserveridentity"), "Hostname verification stays enabled");
+
+        final String vigilis = read("/db/migration/vigilis/V4__smtp_default_public_host.sql");
+        assertTrue(vigilis.contains("mail.lexvertex.cloud"));
+        assertTrue(vigilis.contains("no-reply@lexvertex.cloud"));
+        assertTrue(vigilis.contains("despacho_smtp_default"));
+        assertFalse(vigilis.contains("smtp_password"), "SMTP password must not be stored by Flyway");
+    }
+
     private static void assertResource(final String path) throws IOException {
         try (InputStream in = BaselineMigrationsTest.class.getResourceAsStream(path)) {
             assertNotNull(in, "Missing classpath resource: " + path);
