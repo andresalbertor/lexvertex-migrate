@@ -119,10 +119,11 @@ class BaselineMigrationsTest {
         assertFalse(config.contains("checkserveridentity"), "Hostname verification stays enabled");
 
         final String vigilis = read("/db/migration/vigilis/V4__smtp_default_public_host.sql");
+        final String vigilisSql = vigilis.replaceAll("(?m)--[^\\n]*", "");
         assertTrue(vigilis.contains("mail.lexvertex.cloud"));
         assertTrue(vigilis.contains("no-reply@lexvertex.cloud"));
         assertTrue(vigilis.contains("despacho_smtp_default"));
-        assertFalse(vigilis.contains("smtp_password"), "SMTP password must not be stored by Flyway");
+        assertFalse(vigilisSql.contains("smtp_password"), "SMTP password must not be stored by Flyway");
     }
 
     private static void assertResource(final String path) throws IOException {
