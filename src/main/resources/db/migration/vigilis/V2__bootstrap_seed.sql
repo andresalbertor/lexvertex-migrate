@@ -1,6 +1,7 @@
 -- Bootstrap seed for schema vigilis (default app_config + schema_migrations ledger).
 -- Mirrors vigilis.data.gateway DEFAULT_* so cold-start PDN has usable initial settings.
--- SMTP secrets stay empty; operators configure despacho_smtp_default after deploy.
+-- SMTP secrets stay empty here; V3__smtp_default_mailserver.sql sets host/contact/remitente.
+-- smtp_password is never in Flyway — PDN one-shot with MAIL_CONTACT_PASSWORD.
 
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';

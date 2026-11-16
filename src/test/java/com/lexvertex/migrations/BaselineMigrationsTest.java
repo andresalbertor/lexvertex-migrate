@@ -101,6 +101,28 @@ class BaselineMigrationsTest {
         assertTrue(seed.contains("despacho_smtp_default"), "Must seed despacho_smtp_default");
         assertTrue(seed.contains("006_audit_created_by_updated_by"),
                 "Must mark vigilis SQL migrations as applied");
+
+        final String dropLegacy = read("/db/migration/vigilis/V5__drop_hallazgos_sic_legacy.sql");
+        assertTrue(dropLegacy.contains("DROP TABLE IF EXISTS vigilancia_sic_hallazgos"),
+                "SIC findings live on actuaciones, not the legacy hallazgos table");
+        assertTrue(dropLegacy.contains("007_retirar_hallazgos_sic_legacy"),
+                "Flyway must record the vigilis SQL version so the app runner does not reapply it");
+    }
+
+    @Test
+    @DisplayName("PDN SMTP usa mail.lexvertex.cloud")
+    void smtpProdUsesPublicMailHost() throws IOException {
+        final String config = read("/db/migration/lex_config/V5__smtp_prod_public_host.sql");
+        assertTrue(config.contains("mail.lexvertex.cloud"), "Account/identity host must be the public mail name");
+        assertTrue(config.contains("spring.mail.host"));
+        assertTrue(config.contains("mail.smtp.ssl.trust"));
+        assertFalse(config.contains("checkserveridentity"), "Hostname verification stays enabled");
+
+        final String vigilis = read("/db/migration/vigilis/V4__smtp_default_public_host.sql");
+        assertTrue(vigilis.contains("mail.lexvertex.cloud"));
+        assertTrue(vigilis.contains("no-reply@lexvertex.cloud"));
+        assertTrue(vigilis.contains("despacho_smtp_default"));
+        assertFalse(vigilis.contains("smtp_password"), "SMTP password must not be stored by Flyway");
     }
 
     private static void assertResource(final String path) throws IOException {
